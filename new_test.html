@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Quizz System</title>
+    <link rel="stylesheet" href="/public/css/teacherDashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo"></div>
+        <ul class="menu">
+            <li>
+                <a href="teacher_dashboard.html">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="teacher_profile.html">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="add_data.html">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Add Class/Students</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="new_test.html">
+                    <i class="fas fa-address-book"></i>
+                    <span>Add Test</span>
+                </a>
+            </li>
+            <li>
+                <a href="index2.html">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Question Bank</span>
+                </a>
+            </li>
+            <li class="logout">
+                <a href="teacher_login.html">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="header-wrappper">
+            <div class="header-title">
+                <h2>Add Test</h2>
+            </div>
+        </div>
+        <div class="wrapper" style="margin-left: 25%; height: 680px; width: 600px;">
+            <form action="/new_test" method="post">
+                <h1>Add New Test</h1>
+
+                <div class="form-group">
+                    <label>Test name (title)</label>
+                    <input type="text" class="form-control" name="test_name" placeholder="Test name" required />
+                </div>
+                <div class="form-group">
+                    <label>Subject name</label>
+                    <input type="text" class="form-control" name="subject_name" placeholder="Subject name" required />
+                </div>
+                <div class="form-group">
+                    <label>Test date</label>
+                    <input type="date" class="form-control" name="test_date" placeholder="Test Date" required />
+                </div>
+                <div class="form-group">
+                    <label>Total Questions count</label>
+                    <select type="number" id="num-questions" name="total_questions" placeholder="Total questions count">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                        <option value="20">30</option>
+                        <option value="20">40</option>
+                        <option value="20">50</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="options" name="test_status" class="btn-round" required style="width:100%;">
+                        <option selected="true" value="" disabled="disabled">Select test status</option>
+                        <!-- code to display available options -->
+                        <script>
+                            // Assuming you have a route in your Node.js app to fetch test statuses and classes
+                            // Fetch test statuses
+                            fetch('/fetchTestStatus')
+                                .then(response => response.json())
+                                .then(data => {
+                                    const testStatusSelect = document.querySelector('select[name="test_status"]');
+                                    testStatusSelect.innerHTML = '';
+                                    testStatusSelect.add(new Option('Select test status', '', true, true));
+                                    data.testStatuses.forEach(status => {
+                                        testStatusSelect.add(new Option(status.name, status.id));
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching test statuses:', error);
+                                });
+
+                            // Fetch classes
+                            fetch('/fetchClasses')
+                                .then(response => response.json())
+                                .then(data => {
+                                    const classSelect = document.querySelector('select[name="test_class"]');
+                                    classSelect.innerHTML = '';
+                                    classSelect.add(new Option('Select class for test', '', true, true));
+                                    data.classes.forEach(myClass => {
+                                        classSelect.add(new Option(myClass.name, myClass.id));
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching classes:', error);
+                                });
+                        </script>
+
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="options" name="test_class" class="btn-round" required style="width:100%;">
+                        <option selected="true" value="" disabled="disabled">Select class for test</option>
+
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn btn-primary btn-block btn-round">CREATE TEST</button>
+                </div>
+                <!-- <button type="submit" class="btn" onclick="window.location.href = 'teacher_dashboard.html';" value="Login">Create</button> -->
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

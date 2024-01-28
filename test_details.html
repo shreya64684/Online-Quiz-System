@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Quizz System</title>
+    <link rel="stylesheet" href="/public/css/teacherDashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo"></div>
+        <ul class="menu">
+            <li class="active">
+                <a href="teacher_dashboard.html">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="teacher_profile.html">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="add_data.html">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Add Class/Students</span>
+                </a>
+            </li>
+            <li>
+                <a href="new_test.html">
+                    <i class="fas fa-address-book"></i>
+                    <span>Add Test</span>
+                </a>
+            </li>
+            <li>
+                <a href="index2.html">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Question Bank</span>
+                </a>
+            </li>
+            <li class="logout">
+                <a href="teacher_login.html">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="header-wrappper">
+            <div class="header-title">
+                <h2>Test Details</h2>
+            </div>
+        </div>
+        <div class="wrapper" style="margin-left: 1%; height: 560px; width: 450px;">
+            <form action="/general_settings_update" method="post">
+                <h1>General Settings</h1>
+
+                <div class="form-group">
+                    <label>Test name (title)</label>
+                    <input type="text" class="form-control" id="test_name" name="test_name" placeholder="Test name"
+                        required />
+                </div>
+                <div class="form-group">
+                    <label>Subject name</label>
+                    <input type="text" class="form-control" id="subject_name" name="subject_name"
+                        placeholder="Subject name" required />
+                </div>
+                <div class="form-group">
+                    <label>Test date</label>
+                    <input type="date" class="form-control" id="test_date" name="test_date" placeholder="Test Date"
+                        required />
+                </div>
+                <div class="form-group">
+                    <label>Total Questions count</label>
+                    <select type="number" id="num_questions" name="total_questions" placeholder="Total questions count">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                        <option value="20">30</option>
+                        <option value="20">40</option>
+                        <option value="20">50</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="options" name="test_status" class="btn-round" required style="width:100%;">
+                        <option selected="true" value="" disabled="disabled">Select test status</option>
+                        <!-- code to display available options -->
+                        <script>
+                            // Assuming you have a route in your Node.js app to fetch test statuses and classes
+                            // Fetch test statuses
+                            fetch('/fetchTestStatus')
+                                .then(response => response.json())
+                                .then(data => {
+                                    const testStatusSelect = document.querySelector('select[name="test_status"]');
+                                    testStatusSelect.innerHTML = '';
+                                    testStatusSelect.add(new Option('Select test status', '', true, true));
+                                    data.testStatuses.forEach(status => {
+                                        testStatusSelect.add(new Option(status.name, status.id));
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching test statuses:', error);
+                                });
+                        </script>
+                    </select>
+                </div>
+
+                <script>
+                    // Extract the testId from the URL or another source (replace '1' with the actual test ID)
+                    // const testId = 4; // Replace with your actual test ID
+                    const urlParams = new URLSearchParams(window.location.search);
+                    console.log(urlParams);
+                    // const testIdString = urlParams.get('testId');
+                    // console.log(testIdString);
+                    const testId = urlParams.get('testId');
+                    //const testId = 4;
+
+                    // Check if the testId is valid before making the API request
+                    if (testId) {
+                        console.log('Test ID:', testId);
+                        // Fetch the test details from the server using the API
+                        // const testId = JSON.parse(decodeURIComponent(testIdString));
+                        // console.log(testId);
+                        fetch(`/api/getTestDetails/${testId}`, {
+                            method: 'GET',
+                            // You can customize headers and other options here
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                // Populate the form fields with the test details
+                                document.getElementById('test_name').value = data.name;
+                                document.getElementById('subject_name').value = data.subject;
+                                const inputDate = new Date(data.test_date);
+
+                                // Check if the date is a valid date
+                                if (!isNaN(inputDate.getTime())) {
+                                    const formattedDate = inputDate.toISOString().split('T')[0];
+                                    document.getElementById('test_date').value = formattedDate;
+                                } else {
+                                    console.error('Invalid date format:', data.test_date);
+                                    // Handle the error or provide a default value
+                                }
+                                document.getElementById('test_date').value = formattedDate;
+                                document.getElementById('num-questions').value = data.total_questions;
+                                document.querySelector('select[name="test_status"]').value = data.test_status;
+                            })
+                            .catch(error => {
+                                console.error('Error fetching test details:', error);
+                            });
+                    } else {
+                        console.error('Invalid testId in the URL');
+                    }
+                </script>
+
+                <div class="form-group">
+                    <button class="btn btn-primary btn-block btn-round">UPDATE</button>
+                </div>
+                <!-- <button type="submit" class="btn" onclick="window.location.href = 'teacher_dashboard.html';" value="Login">Create</button> -->
+            </form>
+        </div>
+
+        <div class="wrapper" style="margin-left: 50%; margin-top: -44%;height: 350px; width: 600px;">
+            <form action="/completed/<%= testId %>" method="post">
+                <h1>Other Settings</h1>
+
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <button class="btn btn-primary btn-block" style="margin-left: 30%;" type="submit">MARK AS
+                            COMPLETED</button>
+                    </div>
+                </div>
+            </form>
+            <form action="/deleteTest/<%= testId %>" method="post">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <button class="btn btn-primary btn-block" style="margin-left: 60%;" type="submit">DELETE
+                            TEST</button>
+                    </div>
+                </div>
+            </form>
+            <div class="col-md-8">
+                <div class="form-group">
+                    <button class="btn btn-primary btn-block" style="margin-left: 30%;" onclick="student_data()">GET
+                        STUDENT DATA</button>
+                </div>
+                <script>
+                    function student_data() {
+                        window.location.href = '/student_test_credentials.html';
+                    }
+                </script>
+            </div>
+
+        </div>
+
+        <div class="content" style="min-height: auto; margin-top: 20%;">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card" style="min-height:400px;">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h5 class="title">Test Questions</h5>
+                                </div>
+                                <!-- <form id="form-add-questions" method="POST" action="add_question.php"> -->
+                                <input type="hidden" name="test_id" value="<?= $test_id;?>">
+                                </form>
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary btn-block btn-round" data-toggle="modal"
+                                        data-target="#uploadModal"
+                                        style="margin-top:0px;width:200px !important;float:right !important;">UPLOAD</button>
+                                </div>
+
+                                <!-- Modal for file upload -->
+                                <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog"
+                                    aria-labelledby="uploadModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="uploadModalLabel">Upload Questions</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <input type="file" id="fileInput" accept=".xlsx, .xls">
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-dismiss="modal">Close</button>
+                                                <button type="button" class="btn btn-primary"
+                                                    onclick="uploadFile()">Upload</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary btn-block btn-round"
+                                        style="margin-top:0px;width:200px !important;float:right !important;">GET RANDOM
+                                        QUESTIONS</button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary btn-block btn-round"
+                                        style="margin-top:0px;width:200px !important;float:right !important;">ADD NEW
+                                        QUESTION</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <table id="example" class="table table-striped table-bordered" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>SERIAL NO</th>
+                                        <th>Question title</th>
+                                        <th>Option (A)</th>
+                                        <th>Option (B)</th>
+                                        <th>Option (C)</th>
+                                        <th>Option (D)</th>
+                                        <th>Correct Option</th>
+                                        <th>Score</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="question-list">
+                                    <!-- Questions will be displayed here -->
+                                </tbody>
+                            </table>
+
+                            <script>
+                                fetch(`/fetch-questions/${testId}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        const questionList = document.getElementById('question-list');
+                                        data.forEach((row, index) => {
+                                            const questionId = row.id;
+                                            const title = row.title;
+                                            const optionA = row.optionA;
+                                            const optionB = row.optionB;
+                                            const optionC = row.optionC;
+                                            const optionD = row.optionD;
+                                            const correctAns = row.correctAns;
+                                            const score = row.score;
+
+                                            const newRow = document.createElement('tr');
+                                            newRow.innerHTML = `
+                                    <td>${index + 1}</td>
+                                    <td>${title}</td>
+                                    <td>${optionA}</td>
+                                    <td>${optionB}</td>
+                                    <td>${optionC}</td>
+                                    <td>${optionD}</td>
+                                    <td>${correctAns}</td>
+                                    <td>${score}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-block btn-round" onclick="deleteQuestion(${questionId}, ${testId})">DELETE</button>
+                                    </td>
+                                `;
+                                            questionList.appendChild(newRow);
+                                        });
+                                    })
+                                    .catch(error => {
+                                        console.error('Error fetching questions:', error);
+                                    });
+
+                                function deleteQuestion(questionId, testId) {
+                                    // Implement the logic to delete the question with questionId from the test with testId in the database
+                                    // You can make an AJAX request to your Node.js server to perform this operation
+                                    // Reload the page or update the table after deletion
+                                }
+                            </script>
+                        </div>
+</body>
+
+</html>

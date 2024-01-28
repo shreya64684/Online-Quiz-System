@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Quizz System</title>
+    <link rel="stylesheet" href="/public/css/teacherDashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- <link rel="stylesheet" href="/public/css/style.css"/> -->
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo"></div>
+        <ul class="menu">
+            <li>
+                <a href="teacher_dashboard.html">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="teacher_profile.html">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="add_data.ejs">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Add Class/Students</span>
+                </a>
+            </li>
+            <li>
+                <a href="new_test.html">
+                    <i class="fas fa-address-book"></i>
+                    <span>Add Test</span>
+                </a>
+            </li>
+            <li>
+                <a href="index2.html">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Question Bank</span>
+                </a>
+            </li>
+            <li class="logout">
+                <a href="teacher_login.html">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="header-wrappper">
+            <div class="header-title">
+                <h2>Add Class / Student</h2>
+            </div>
+        </div>
+        <div class="wrapper">
+            <form action="/add_data" method="post">
+                <h1>Add Class</h1>
+                
+                 <div class="input-box">
+                    <label>Class Name</label>
+                    <input type="text" class="form-control" id="class_name" name="class_name" placeholder="Class name" required>
+                    <span id = "class_name_error" class="error text-danger"></span>
+                 </div>
+                 <div class="form-group">
+                    <label>Starting Roll number</label>
+                    <input type="text" class="form-control" id = "starting_roll_number" name="starting_roll_number" placeholder="Starting roll number"/>
+                    <span id = "starting_roll_error" class="error text-danger"></span>
+                  </div>
+                  <div class="form-group">
+                    <label>Ending Roll number</label>
+                    <input type="text" class="form-control" id = "ending_roll_number" name="ending_roll_number" placeholder="Ending roll number"/>
+                    <span id = "ending_roll_error" class="error text-danger"></span>
+                  </div>
+                 
+                  <div class="form-group"><br/>
+                    <button class="btn btn-primary btn-block btn-round" onclick = 'createNewClass()'>CREATE</button>
+                  </div>
+                  <!-- <button type="submit" class="btn" onclick="window.location.href = 'teacher_dashboard.html';" value="Login">Create</button> -->
+            </form>   
+        </div>
+        <div class="student">
+            <form action="/add-extra-student" method="post">
+                <h1>Add Student</h1>
+                <div class="form-group">
+                <select id="options" name="class_name" class="btn-round" required style="width:100%;">
+                    <option selected="true" value="" disabled="disabled">Select class for test</option>      
+                </select>
+                <script>
+                  fetch('/fetchClasses')
+                     .then(response => response.json())
+                     .then(data => {
+                      const classSelect = document.querySelector('select[name="class_name"]');
+                                    classSelect.innerHTML = '';
+                                    classSelect.add(new Option('Select class for test', '', true, true));
+                                    data.classes.forEach(myClass => {
+                                        classSelect.add(new Option(myClass.name, myClass.id));
+                          });
+                     })
+                     .catch(error => {
+                          console.error('Error fetching classes:', error);
+                     });
+                </script>
+                </div>
+                <span id = "extra_roll_class_error" class="error text-danger"></span>
+                <div class="form-group" style="margin-top:10px;">
+                    <label>Student Roll number</label>
+                    <input type="text" class="form-control" id="extra_roll_number" name="extra_roll_number" placeholder="Student Roll number"/>
+                    <span id = "extra_roll_error" class="error text-danger"></span>
+                </div>
+                 
+                  <div class="form-group"><br/>
+                    <button class="btn btn-primary btn-block" onclick = 'addStudent()'>ADD</button>
+                  </div>
+                  <!-- <button type="submit" class="btn" onclick="window.location.href = 'teacher_dashboard.html';" value="Login">Create</button> -->
+            </form>   
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+
+        $( document ).ready(function() {
+          $.ajax({
+                            type: 'POST',
+                            url: '/get-classes',
+                            success: function (response) {
+                  var opts = $.parseJSON(response);
+                    $.each(opts, function(i, d) {
+                        $('#options').append('<option value="' + d + '">' + d + '</option>');
+                    });
+                            }
+                        });
+        });
+    
+        function createNewClass(){
+          var someValidationFailed = false;
+    
+          if(!$('#class_name').val()){
+              $('#class_name_error').html("Please enter Class Name");
+              someValidationFailed = true;
+          }
+    
+          if(!$('#starting_roll_number').val()){
+            $('#starting_roll_error').html("Please enter Starting roll number");
+            someValidationFailed = true;
+          }
+    
+          if($('#starting_roll_number').val() && !$.isNumeric($('#starting_roll_number').val())){
+            $('#starting_roll_error').html("Please enter a valid Starting roll number");
+            someValidationFailed = true;
+          }
+    
+          if(!$('#ending_roll_number').val()){
+            $('#ending_roll_error').html("Please enter Ending roll number");
+            someValidationFailed = true;
+          }
+    
+          if($('#ending_roll_number').val() && !$.isNumeric($('#ending_roll_number').val())){
+            $('#ending_roll_error').html("Please enter a valid Ending roll number");
+            someValidationFailed = true;
+          }
+          
+          if(!someValidationFailed){
+            
+          $.ajax({
+              type: 'POST',
+              url: '/add-new-class',
+              data: {
+                'class_name': $('#class_name').val(),
+                'starting_roll_number': $('#starting_roll_number').val(),
+                'ending_roll_number': $('#ending_roll_number').val()
+              },
+              success: function (response) {
+                alert(response);
+              }
+            });
+          }
+    }
+    
+        function addStudent() {
+          var someValidationFailed = false;
+    
+          if(!$('#options').val()) {
+            $('#extra_roll_class_error').html("Please select class");
+            someValidationFailed = true;
+          }
+    
+          if(!$('#extra_roll_number').val()){
+            $('#extra_roll_error').html("Please enter the Roll number");
+            someValidationFailed = true;
+          }
+    
+          if($('#extra_roll_number').val() && !$.isNumeric($('#extra_roll_number').val())){
+            $('#extra_roll_error').html("Please enter a valid Roll number");
+            someValidationFailed = true;
+          }
+        
+        if(!someValidationFailed){
+          $.ajax({
+            type: 'POST',
+            url: 'add-extra-student',
+            data: {
+              'class_name': $('#options').val(),
+              'extra_roll_number': $('#extra_roll_number').val(),
+            },
+            success: function (response) {
+              alert(response);
+              location.reload();
+            }
+          }); 
+        } 
+        }
+    
+      </script>
+    
+
+        
+
+    
+    
+
+        
+</body>
+
+</html>
