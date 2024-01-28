@@ -167,6 +167,13 @@ app.get('/api/getTestDetails/:testId', (req, res) => {
   });
 });
 
+app.get('/getStudentData/:testId', (req, res) => {
+  const testId = req.params.testId ;
+
+  
+})
+
+
 app.get('/fetch-questions/:testId', (req, res) => {
   const testId = req.params.testId;
   console.log(testId);
@@ -453,7 +460,6 @@ app.post('/delete/:testId', (req, res) => {
     }
   });
 });
-
 
 
 

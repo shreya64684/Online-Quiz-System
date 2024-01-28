@@ -105,6 +105,13 @@
                                     testStatusSelect.add(new Option('Select test status', '', true, true));
                                     data.testStatuses.forEach(status => {
                                         testStatusSelect.add(new Option(status.name, status.id));
+
+                                        // Check if the current status ID matches the one from the server data
+                                        // if (status.id === data.test_status) {
+                                        //     option.selected = true;
+                                        // }
+
+                                        // testStatusSelect.add(option);
                                     });
                                 })
                                 .catch(error => {
@@ -169,8 +176,9 @@
         </div>
 
         <div class="wrapper" style="margin-left: 50%; margin-top: -44%;height: 350px; width: 600px;">
+            <h1>Other Settings</h1>
             <form action="/completed/<%= testId %>" method="post">
-                <h1>Other Settings</h1>
+
 
                 <div class="col-md-8">
                     <div class="form-group">
@@ -194,7 +202,29 @@
                 </div>
                 <script>
                     function student_data() {
-                        window.location.href = '/student_test_credentials.html';
+                        // const testIdString = JSON.stringify(testId);
+                        // window.location.href = `/student_test_credentials.html?testId=${encodeURIComponent(testIdString)}`;
+                        // console.log(testIdString);
+                        const currentUrl = window.location.href;
+
+                        // Use URLSearchParams to extract query parameters from the URL
+                        const urlParams = new URLSearchParams(currentUrl);
+
+                        // Get the value of the 'testId' parameter
+                        let testId = urlParams.get('testId');
+
+                        // Remove quotation marks if present
+                        if (testId) {
+                            testId = testId.replace(/["']/g, ''); // Remove single and double quotes
+
+                            // Update the URL without quotes
+                            const newUrl = currentUrl.replace(`testId="${testId}"`, `testId=${testId}`);
+                            console.log(newUrl);
+                            window.location.href = newUrl;
+                        } else {
+                            console.error('testId not found in the URL');
+                            // Handle the case where testId is not found
+                        }
                     }
                 </script>
             </div>
