@@ -41,7 +41,7 @@ app.get('/teacher_login.html', (req, res) => {
   res.sendFile(__dirname + '/teacher_login.html');
 })
 
-app.get('/student_login.html', (req, res) => {
+app.get('/student_login', (req, res) => {
   res.sendFile(__dirname + '/student_login.html');
 })
 
@@ -238,6 +238,79 @@ app.post('/login', (req, res) => {
   
 });
 
+app.post('/student_login', (req, res) => {
+  const student_roll_number = req.body.rollNumber;
+  const student_password = req.body.studentpassword;
+
+  const sql1 = 'SELECT id FROM student_data WHERE rollno = ?';
+  
+  connection.execute(sql1, [student_roll_number], (err, results1) => {
+    console.log(student_roll_number)
+    console.log(results1);
+    if (err) {
+      console.error('Error querying student_data:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    if (results1.length === 0) {
+      return res.status(200).json({ message: 'STUDENT_RECORD_NOT_FOUND 1' });
+    }
+
+    const student_id = results1[0].id;
+    console.log(student_id);
+    const sql2 = 'SELECT id, test_id, rollno, score, status FROM students WHERE rollno = ? AND password = ? AND status = 0';
+    
+    connection.execute(sql2, [student_id, student_password], (err, results2) => {
+      console.log(student_id);
+      console.log(student_password);
+      if (err) {   //9hFqUDx3
+        console.error('Error querying students:', err);
+        return res.status(500).json({ message: 'Database error' });
+      }
+      console.log(results2);
+      if (results2.length === 0) {
+        return res.status(200).json({ message: 'STUDENT_RECORD_NOT_FOUND' });
+      }
+
+      // If login is successful, redirect to student dashboard
+      res.redirect('/student_dashboard.html');
+    });
+  });
+});
+
+  
+
+
+// app.post('/student_login', (req, res) => {
+//   const student_roll_number = req.body.rollNumber;
+//   const student_password = req.body.studentpassword;
+//   console.log(student_roll_number);
+//   console.log(student_password);
+//   const sql1 = 'SELECT id, password FROM student_data WHERE rollno = ?';
+  
+//   connection.execute(sql1, [student_roll_number], (err, results) => {
+//     if (err) {
+//       console.error('Error querying student_data:', err);
+//       res.status(500).json({ message: 'Database error' });
+//       return;
+//     }
+//     if (results.length > 0) {
+//       const stored_password = results[0].password;
+//       console.log(stored_password); 
+//       // Compare the plain-text password provided by the user with the password stored in the database
+//       if (student_password === stored_password) {
+//         // Redirect to student dashboard upon successful login
+//         res.redirect('/student_dashboard.html');
+//       } else {
+//         // Password provided by the user does not match the password stored in the database
+//         res.status(200).json({ message: 'INVALID_PASSWORD' });
+//       }
+//     } else {
+//       // No student found with the provided roll number
+//       res.status(200).json({ message: 'STUDENT_RECORD_NOT_FOUND' });
+//     }
+//   });
+// });
 app.get('/teacher_dashboard', (req, res) => {
   const teacher_id = req.session.teacher_id;
   console.log(teacher_id);
@@ -261,42 +334,6 @@ app.get('/teacher_dashboard', (req, res) => {
   });
 });
 
-
-
-app.post('/student_login', (req, res) => {
-  const student_roll_number = req.body.rollNumber;
-  const student_password = req.body.studentpassword;
-
-  const sql1 = `SELECT id FROM student_data WHERE rollno = ?`;
-  connection.execute(sql1, [student_roll_number], (err, results1) => {
-    if (err) {
-      console.error('Error querying student_data:', err);
-      res.status(500).json({ message: 'Database error' });
-      return;
-    }
-    if (results1.length > 0) {
-      const student_id = results1[0].id;
-
-      const sql2 = `SELECT id, test_id, rollno, score, status FROM students WHERE rollno = ? AND password = ? AND status = 0`;
-      connection.execute(sql2, [student_id, student_password], (err, results2) => {
-        if (err) {
-          console.error('Error querying students:', err);
-          res.status(500).json({ message: 'Database error' });
-          return;
-        }
-
-        if (results2.length > 0) {
-          const info = results2;
-          res.redirect('/student_dashboard.html');
-        } else {
-          res.status(200).json({ message: 'STUDENT_RECORD_NOT_FOUND' });
-        }
-      });
-    } else {
-      res.status(200).json({ message: 'STUDENT_RECORD_NOT_FOUND' });
-    }
-  });
-});
 
 const classesRoute = require('./routes/classes');
 app.use('/classes', classesRoute);
